@@ -12,7 +12,7 @@ class Game:
         self.snake_body = [(50,50),(40,50),(30,50),(20,50)]
         self.snake_position = [50,50]
         self.direction='RIGHT'
-        self.speed = 5
+        self.speed = 10
         self.eaten=False
         self.score=0
         self.dead=False
@@ -72,77 +72,150 @@ class Game:
     
 
     def get_direction(self,output):
-        return ['UP','DOWN','LEFT','RIGHT'][output.index(max(output))]
+        
+        out = [0,1,2][output.index(max(output))]
+        if(out==1):
+            return self.direction
+        elif(out==0):
+            if(self.direction=='RIGHT'):
+                return 'UP'
+            elif(self.direction=='UP'):
+                return 'LEFT'
+            elif(self.direction=='LEFT'):
+                return 'DOWN'
+            else:
+                return 'RIGHT'
+        else:
+            if(self.direction=='RIGHT'):
+                return 'DOWN'
+            elif(self.direction=='UP'):
+                return 'RIGHT'
+            elif(self.direction=='LEFT'):
+                return 'UP'
+            else:
+                return 'LEFT'
+        return self.direction
     
     def get_inputs(self):
-        def bresenham(x1, y1, x2, y2):
-            points = []
-            dx = abs(x2 - x1)
-            dy = abs(y2 - y1)
-            x, y = x1, y1
-            sx = 1 if x2 > x1 else -1
-            sy = 1 if y2 > y1 else -1
-            if dx > dy:
-                err = dx / 2.0
-                while abs(x - x2) > 0.5:
-                    points.append((x, y))
-                    err -= dy
-                    if err < 0:
-                        y += sy
-                        err += dx
-                    x += sx
-            else:
-                err = dy / 2.0
-                while abs(y - y2) > 0.5:
-                    points.append((x, y))
-                    err -= dx
-                    if err < 0:
-                        x += sx
-                        err += dy
-                    y += sy
-            points.append((x, y))
-            return np.array(points)
-        def get_body_distance_in_n_directions(n=8, angles=None):
-            grid_size = WIN_HEIGHT
-            snake_head_pos = self.snake_position[0], self.snake_position[1]
-            snake_head_to_body_distances = np.zeros(n)
-            angle_index = 0
-            angle = 0
-            for i in range(n):
-                if angles is not None:
-                    angle = angles[i]
-                # make a ray from the snake_data head in the direction of the angle to the end of the grid
-                vector = math.cos(angle) * grid_size * 2, math.sin(angle) * grid_size * 2
-                ray = bresenham(snake_head_pos[0], snake_head_pos[1], snake_head_pos[0] + vector[0],
-                                snake_head_pos[1] + vector[1])
-                # check if the ray intersects with a body part
-                has_intersection(angle_index, ray, snake_head_to_body_distances)
-                angle_index += 1
-                angle += 2 * math.pi / n
-            # if 0 in snake_head_to_body_distances:
-                # print(snake_head_to_body_distances)
-            return snake_head_to_body_distances
-        def has_intersection(angle_index, ray, snake_head_to_body_distances):
-            for x, y in ray:
-                x, y = int(x), int(y)
-                # check if point is in the grid
-                if not (0 <= x < WIN_WIDTH and 0 <= y < WIN_HEIGHT):
-                    break
+        # def bresenham(x1, y1, x2, y2):
+        #     points = []
+        #     dx = abs(x2 - x1)
+        #     dy = abs(y2 - y1)
+        #     x, y = x1, y1
+        #     sx = 1 if x2 > x1 else -1
+        #     sy = 1 if y2 > y1 else -1
+        #     if dx > dy:
+        #         err = dx / 2.0
+        #         while abs(x - x2) > 0.5:
+        #             points.append((x, y))
+        #             err -= dy
+        #             if err < 0:
+        #                 y += sy
+        #                 err += dx
+        #             x += sx
+        #     else:
+        #         err = dy / 2.0
+        #         while abs(y - y2) > 0.5:
+        #             points.append((x, y))
+        #             err -= dx
+        #             if err < 0:
+        #                 x += sx
+        #                 err += dy
+        #             y += sy
+        #     points.append((x, y))
+        #     return np.array(points)
+        # def get_body_distance_in_n_directions(n=8, angles=None):
+        #     grid_size = WIN_HEIGHT
+        #     snake_head_pos = self.snake_position[0], self.snake_position[1]
+        #     snake_head_to_body_distances = np.zeros(n)
+        #     angle_index = 0
+        #     angle = 0
+        #     for i in range(n):
+        #         if angles is not None:
+        #             angle = angles[i]
+        #         # make a ray from the snake_data head in the direction of the angle to the end of the grid
+        #         vector = math.cos(angle) * grid_size * 2, math.sin(angle) * grid_size * 2
+        #         ray = bresenham(snake_head_pos[0], snake_head_pos[1], snake_head_pos[0] + vector[0],
+        #                         snake_head_pos[1] + vector[1])
+        #         # check if the ray intersects with a body part
+        #         has_intersection(angle_index, ray, snake_head_to_body_distances)
+        #         angle_index += 1
+        #         angle += 2 * math.pi / n
+        #     # if 0 in snake_head_to_body_distances:
+        #         # print(snake_head_to_body_distances)
+        #     return snake_head_to_body_distances
+        # def has_intersection(angle_index, ray, snake_head_to_body_distances):
+        #     for x, y in ray:
+        #         x, y = int(x), int(y)
+        #         # check if point is in the grid
+        #         if not (0 <= x < WIN_WIDTH and 0 <= y < WIN_HEIGHT):
+        #             break
 
-                if (x,y) in self.snake_body[1:]:
-                    snake_head_to_body_distances[angle_index] = np.sqrt(
-                        (x - self.snake_position[0]) ** 2 + (y - self.snake_position[1]) ** 2)
-                    break
+        #         if (x,y) in self.snake_body[1:]:
+        #             snake_head_to_body_distances[angle_index] = np.sqrt(
+        #                 (x - self.snake_position[0]) ** 2 + (y - self.snake_position[1]) ** 2)
+        #             break
         
         wall_distances = [self.snake_position[0],WIN_WIDTH-self.snake_position[1],self.snake_position[1],WIN_HEIGHT-self.snake_position[1]]
-        snake_head_pos = pygame.Vector2(self.snake_position[0], self.snake_position[1])
-        food_pos = pygame.Vector2(self.food_pos[1], self.food_pos[0])
-        snake_head_to_food=snake_head_pos-food_pos
-        inputs = [distance for distance in
-              get_body_distance_in_n_directions(n=4)] + \
-              [distance for distance in wall_distances] + \
-             [snake_head_to_food.as_polar()[1]] + \
-             [snake_head_to_food.length()]
+        # snake_head_pos = pygame.Vector2(self.snake_position[0], self.snake_position[1])
+        # food_pos = pygame.Vector2(self.food_pos[1], self.food_pos[0])
+        # snake_head_to_food=snake_head_pos-food_pos
+        snake_distance = [-1,-1,-1,0,0]
+        if(self.direction=='LEFT'):
+            snake_distance[0]=WIN_HEIGHT-self.snake_position[1]
+            snake_distance[1]=self.snake_position[0]
+            snake_distance[2]=self.snake_position[1]
+            for c in self.snake_body[1:]:
+                if(c[1]==self.snake_position[1] and c[0]<self.snake_position[0]):
+                    snake_distance[1]=min(snake_distance[1],self.snake_position[0]-c[0])
+                if(c[0]==self.snake_position[0] and c[1]>self.snake_position[1]):
+                    snake_distance[0]=min(snake_distance[0],c[1]-self.snake_position[1])
+                if(c[0]==self.snake_position[0] and c[1]<self.snake_position[1]):
+                    snake_distance[2]=min(snake_distance[2],self.snake_position[1]-c[1])
+            snake_distance[3]=self.snake_position[0]-self.food_pos[0]
+            snake_distance[4]=self.snake_position[1]-self.food_pos[1]
+        elif(self.direction=='UP'):
+            snake_distance[0]=self.snake_position[0]
+            snake_distance[1]=self.snake_position[1]
+            snake_distance[2]=WIN_WIDTH-self.snake_position[0]
+            for c in self.snake_body[1:]:
+                if(c[0]==self.snake_position[0] and c[1]<self.snake_position[1]):
+                    snake_distance[1]=min(snake_distance[1],self.snake_position[1]-c[1])
+                if(c[1]==self.snake_position[1] and c[0]>self.snake_position[0]):
+                    snake_distance[0]=min(snake_distance[0],c[0]-self.snake_position[0])
+                if(c[1]==self.snake_position[1] and c[0]<self.snake_position[0]):
+                    snake_distance[2]=min(snake_distance[2],self.snake_position[0]-c[0])
+            snake_distance[3]=self.snake_position[1]-self.food_pos[1]
+            snake_distance[4]=self.food_pos[0]-self.snake_position[0]
+        elif(self.direction=='RIGHT'):
+            snake_distance[0]=self.snake_position[1]
+            snake_distance[1]=WIN_WIDTH-self.snake_position[0]
+            snake_distance[2]=WIN_HEIGHT-self.snake_position[1]
+            for c in self.snake_body[1:]:
+                if(c[1]==self.snake_position[1] and c[0]>self.snake_position[0]):
+                    snake_distance[1]=min(snake_distance[1],c[0]-self.snake_position[0])
+                if(c[0]==self.snake_position[0] and c[1]<self.snake_position[1]):
+                    snake_distance[0]=min(snake_distance[0],self.snake_position[1]-c[1])
+                if(c[0]==self.snake_position[0] and c[1]>self.snake_position[1]):
+                    snake_distance[2]=min(snake_distance[2],c[1]-self.snake_position[1])
+            snake_distance[3]=self.food_pos[0]-self.snake_position[0]
+            snake_distance[4]=self.food_pos[1]-self.snake_position[1]
+        else:
+            snake_distance[0]=WIN_WIDTH-self.snake_position[0]
+            snake_distance[1]=WIN_HEIGHT-self.snake_position[1]
+            snake_distance[2]=self.snake_position[0]
+            for c in self.snake_body[1:]:
+                if(c[0]==self.snake_position[0] and c[1]>self.snake_position[1]):
+                    snake_distance[1]=min(snake_distance[1],c[1]-self.snake_position[1])
+                if(c[1]==self.snake_position[1] and c[0]>self.snake_position[0]):
+                    snake_distance[0]=min(snake_distance[0],c[0]-self.snake_position[0])
+                if(c[1]==self.snake_position[1] and c[0]<self.snake_position[0]):
+                    snake_distance[2]=min(snake_distance[2],self.snake_position[0]-c[0])
+            snake_distance[3]=self.food_pos[1]-self.snake_position[1]
+            snake_distance[4]=self.snake_position[0]-self.food_pos[0]
+        
+        
+        inputs = snake_distance
         # print(inputs)
         return inputs
     
@@ -189,8 +262,8 @@ if(__name__=='__main__'):
                 changedir=None
             if(changedir=='RIGHT' and game.direction=='LEFT'):
                 changedir=None
-            
         score,snake_body,food_pos,dead,eaten = game.move_snake(changedir)
+        # game.get_inputs()
         if eaten:
             print(score)
         if not dead:
