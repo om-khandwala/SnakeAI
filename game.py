@@ -4,21 +4,23 @@ import random
 import os
 import numpy as np
 import math
-WIN_WIDTH=200
-WIN_HEIGHT=200
+
 
 class Game:
-    def __init__(self):
+    def __init__(self,win_width=200,win_height=200):
         self.snake_body = [(50,50),(40,50),(30,50),(20,50)]
         self.snake_position = [50,50]
         self.direction='RIGHT'
         self.speed = 10
         self.eaten=False
         self.score=0
+        self.win_width=win_width
+        self.win_height=win_height
+        self.food_timer=(max(self.win_height,self.win_width)//10) * 1.414
         self.dead=False
         self.poss = set()
-        for a in range(0,(WIN_WIDTH//10)):
-            for b in range(0,(WIN_HEIGHT//10)):
+        for a in range(0,(self.win_width//10)):
+            for b in range(0,(self.win_height//10)):
                 if((a*10,b*10) not in self.snake_body):
                     self.poss.add((a*10,b*10))
         self.food_pos = random.choice(tuple(self.poss))
@@ -52,10 +54,10 @@ class Game:
         else:
             self.poss.add(self.snake_body.pop())
         
-        if(self.snake_position[0]<0 or self.snake_position[0]>WIN_WIDTH-10):
+        if(self.snake_position[0]<0 or self.snake_position[0]>self.win_width-10):
             self.dead=True
             return self.score,self.snake_body,self.food_pos,self.dead,self.eaten
-        if(self.snake_position[1]<0 or self.snake_position[1]>WIN_HEIGHT-10):
+        if(self.snake_position[1]<0 or self.snake_position[1]>self.win_height-10):
             self.dead=True
             return self.score,self.snake_body,self.food_pos,self.dead,self.eaten
 
@@ -125,7 +127,7 @@ class Game:
         #     points.append((x, y))
         #     return np.array(points)
         # def get_body_distance_in_n_directions(n=8, angles=None):
-        #     grid_size = WIN_HEIGHT
+        #     grid_size = self.win_height
         #     snake_head_pos = self.snake_position[0], self.snake_position[1]
         #     snake_head_to_body_distances = np.zeros(n)
         #     angle_index = 0
@@ -148,7 +150,7 @@ class Game:
         #     for x, y in ray:
         #         x, y = int(x), int(y)
         #         # check if point is in the grid
-        #         if not (0 <= x < WIN_WIDTH and 0 <= y < WIN_HEIGHT):
+        #         if not (0 <= x < self.win_width and 0 <= y < self.win_height):
         #             break
 
         #         if (x,y) in self.snake_body[1:]:
@@ -156,63 +158,63 @@ class Game:
         #                 (x - self.snake_position[0]) ** 2 + (y - self.snake_position[1]) ** 2)
         #             break
         
-        wall_distances = [self.snake_position[0],WIN_WIDTH-self.snake_position[1],self.snake_position[1],WIN_HEIGHT-self.snake_position[1]]
+        wall_distances = [self.snake_position[0],self.win_width-self.snake_position[1],self.snake_position[1],self.win_height-self.snake_position[1]]
         # snake_head_pos = pygame.Vector2(self.snake_position[0], self.snake_position[1])
         # food_pos = pygame.Vector2(self.food_pos[1], self.food_pos[0])
         # snake_head_to_food=snake_head_pos-food_pos
-        snake_distance = [-1,-1,-1,0,0]
+        snake_distance = [-1,-1,-1,200,200,200,0,0]
         if(self.direction=='LEFT'):
-            snake_distance[0]=WIN_HEIGHT-self.snake_position[1]
+            snake_distance[0]=self.win_height-self.snake_position[1]
             snake_distance[1]=self.snake_position[0]
             snake_distance[2]=self.snake_position[1]
             for c in self.snake_body[1:]:
                 if(c[1]==self.snake_position[1] and c[0]<self.snake_position[0]):
-                    snake_distance[1]=min(snake_distance[1],self.snake_position[0]-c[0])
+                    snake_distance[4]=min(snake_distance[4],self.snake_position[0]-c[0])
                 if(c[0]==self.snake_position[0] and c[1]>self.snake_position[1]):
-                    snake_distance[0]=min(snake_distance[0],c[1]-self.snake_position[1])
+                    snake_distance[3]=min(snake_distance[3],c[1]-self.snake_position[1])
                 if(c[0]==self.snake_position[0] and c[1]<self.snake_position[1]):
-                    snake_distance[2]=min(snake_distance[2],self.snake_position[1]-c[1])
-            snake_distance[3]=self.snake_position[0]-self.food_pos[0]
-            snake_distance[4]=self.snake_position[1]-self.food_pos[1]
+                    snake_distance[5]=min(snake_distance[5],self.snake_position[1]-c[1])
+            snake_distance[6]=self.snake_position[0]-self.food_pos[0]
+            snake_distance[7]=self.snake_position[1]-self.food_pos[1]
         elif(self.direction=='UP'):
             snake_distance[0]=self.snake_position[0]
             snake_distance[1]=self.snake_position[1]
-            snake_distance[2]=WIN_WIDTH-self.snake_position[0]
+            snake_distance[2]=self.win_width-self.snake_position[0]
             for c in self.snake_body[1:]:
                 if(c[0]==self.snake_position[0] and c[1]<self.snake_position[1]):
-                    snake_distance[1]=min(snake_distance[1],self.snake_position[1]-c[1])
+                    snake_distance[4]=min(snake_distance[4],self.snake_position[1]-c[1])
                 if(c[1]==self.snake_position[1] and c[0]>self.snake_position[0]):
-                    snake_distance[0]=min(snake_distance[0],c[0]-self.snake_position[0])
+                    snake_distance[3]=min(snake_distance[3],c[0]-self.snake_position[0])
                 if(c[1]==self.snake_position[1] and c[0]<self.snake_position[0]):
-                    snake_distance[2]=min(snake_distance[2],self.snake_position[0]-c[0])
-            snake_distance[3]=self.snake_position[1]-self.food_pos[1]
-            snake_distance[4]=self.food_pos[0]-self.snake_position[0]
+                    snake_distance[5]=min(snake_distance[5],self.snake_position[0]-c[0])
+            snake_distance[6]=self.snake_position[1]-self.food_pos[1]
+            snake_distance[7]=self.food_pos[0]-self.snake_position[0]
         elif(self.direction=='RIGHT'):
             snake_distance[0]=self.snake_position[1]
-            snake_distance[1]=WIN_WIDTH-self.snake_position[0]
-            snake_distance[2]=WIN_HEIGHT-self.snake_position[1]
+            snake_distance[1]=self.win_width-self.snake_position[0]
+            snake_distance[2]=self.win_height-self.snake_position[1]
             for c in self.snake_body[1:]:
                 if(c[1]==self.snake_position[1] and c[0]>self.snake_position[0]):
-                    snake_distance[1]=min(snake_distance[1],c[0]-self.snake_position[0])
+                    snake_distance[4]=min(snake_distance[4],c[0]-self.snake_position[0])
                 if(c[0]==self.snake_position[0] and c[1]<self.snake_position[1]):
-                    snake_distance[0]=min(snake_distance[0],self.snake_position[1]-c[1])
+                    snake_distance[3]=min(snake_distance[3],self.snake_position[1]-c[1])
                 if(c[0]==self.snake_position[0] and c[1]>self.snake_position[1]):
-                    snake_distance[2]=min(snake_distance[2],c[1]-self.snake_position[1])
-            snake_distance[3]=self.food_pos[0]-self.snake_position[0]
-            snake_distance[4]=self.food_pos[1]-self.snake_position[1]
+                    snake_distance[5]=min(snake_distance[5],c[1]-self.snake_position[1])
+            snake_distance[6]=self.food_pos[0]-self.snake_position[0]
+            snake_distance[7]=self.food_pos[1]-self.snake_position[1]
         else:
-            snake_distance[0]=WIN_WIDTH-self.snake_position[0]
-            snake_distance[1]=WIN_HEIGHT-self.snake_position[1]
+            snake_distance[0]=self.win_width-self.snake_position[0]
+            snake_distance[1]=self.win_height-self.snake_position[1]
             snake_distance[2]=self.snake_position[0]
             for c in self.snake_body[1:]:
                 if(c[0]==self.snake_position[0] and c[1]>self.snake_position[1]):
-                    snake_distance[1]=min(snake_distance[1],c[1]-self.snake_position[1])
+                    snake_distance[4]=min(snake_distance[4],c[1]-self.snake_position[1])
                 if(c[1]==self.snake_position[1] and c[0]>self.snake_position[0]):
-                    snake_distance[0]=min(snake_distance[0],c[0]-self.snake_position[0])
+                    snake_distance[3]=min(snake_distance[3],c[0]-self.snake_position[0])
                 if(c[1]==self.snake_position[1] and c[0]<self.snake_position[0]):
-                    snake_distance[2]=min(snake_distance[2],self.snake_position[0]-c[0])
-            snake_distance[3]=self.food_pos[1]-self.snake_position[1]
-            snake_distance[4]=self.snake_position[0]-self.food_pos[0]
+                    snake_distance[5]=min(snake_distance[5],self.snake_position[0]-c[0])
+            snake_distance[6]=self.food_pos[1]-self.snake_position[1]
+            snake_distance[7]=self.snake_position[0]-self.food_pos[0]
         
         
         inputs = snake_distance
@@ -233,7 +235,7 @@ if(__name__=='__main__'):
     pygame.display.set_caption('Snake Game')
     fps=pygame.time.Clock()
     game = Game()
-    game_window=pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    game_window=pygame.display.set_mode((game.win_width, game.win_height))
 
     while True:
         changedir=None
