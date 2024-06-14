@@ -44,7 +44,7 @@ Train the game
 python ai.py
 ```
 
-Usage
+### Usage
 You can change settings in the ai.py file.
 
 ```
