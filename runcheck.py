@@ -5,8 +5,15 @@ from ai import *
 import pygame
 import visualize
 
-DIR = './checkpoint'
+CHECKPOINT_DIR = './checkpoint'
 CONFIG = 'config'
+GAME_SIZE=(200,200)
+FOOD_TIMER=(max(GAME_SIZE[0],GAME_SIZE[1])//10) * 1.414
+RUNWINNER=False
+GUI=True
+GRAPHS=False
+SNAKE_SPEED=10
+# Dont forget to add winner filename when running winner
 
 def runCheckpoints(dirname, config_file,checkpoint=None):
     files = [f for f in os.listdir(dirname)]
@@ -17,27 +24,27 @@ def runCheckpoints(dirname, config_file,checkpoint=None):
 def neuralnet(winner,config):
     return neat.nn.FeedForwardNetwork.create(winner, config)
 
-def runwinner(config,filename='winner.pkl'):
+def runwinner(config,filename):
     with open(filename,"rb") as f:
         winner = pickle.load(f)
         return [("best",(neuralnet(winner,config),winner))]
 
 
-def main(config_file,gui=True,graphs=False,winner=False):
+def main(config_file,gui=True,graphs=False,winner=False,winner_filename="winner.pkl"):
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
                         config_file)
     nets = []
     if(winner):
-        nets = runwinner(config)
+        nets = runwinner(config,filename=winner_filename)
     else:
-        winners = runCheckpoints(DIR,config_file)
+        winners = runCheckpoints(CHECKPOINT_DIR,config_file)
         nets = [(f,(neuralnet(winner,config),winner)) for f,winner in winners]
 
     fps = pygame.time.Clock()
     for f, net in nets:
         if(gui):
-            game = Game()
+            game = Game(GAME_SIZE[0],GAME_SIZE[1],SNAKE_SPEED)
             # dot = draw_net(net[1],net[2],view=True,node_names=node_name,filename=f'{f}.gv')
             screen = pygame.display.set_mode((game.win_width,game.win_height))
             pygame.display.set_caption(f)
@@ -48,7 +55,7 @@ def main(config_file,gui=True,graphs=False,winner=False):
                 inputs = game.get_inputs()
                 output = net[0].activate(inputs)
                 food_timer+=1
-                if(food_timer > game.food_timer*len(game.snake_body)):
+                if(food_timer > FOOD_TIMER*len(game.snake_body)):
                     # genome.fitness=fitness
                     break
                 if(game.eaten):
@@ -71,5 +78,5 @@ def main(config_file,gui=True,graphs=False,winner=False):
 if __name__ == "__main__":
     # Initialize pygame
     pygame.init()
-    main(CONFIG,winner=False)
+    main(CONFIG,gui=GUI,graphs=GRAPHS,winner=RUNWINNER,winner_filename="")
     pygame.quit()

@@ -1,22 +1,17 @@
 import pygame
 import sys
 import random
-import os
-import numpy as np
-import math
-
 
 class Game:
-    def __init__(self,win_width=200,win_height=200):
+    def __init__(self,win_width=200,win_height=200,speed=10):
         self.snake_body = [(50,50),(40,50),(30,50),(20,50)]
         self.snake_position = [50,50]
         self.direction='RIGHT'
-        self.speed = 10
+        self.speed = speed
         self.eaten=False
         self.score=0
         self.win_width=win_width
         self.win_height=win_height
-        self.food_timer=(max(self.win_height,self.win_width)//10) * 1.414
         self.dead=False
         self.poss = set()
         for a in range(0,(self.win_width//10)):

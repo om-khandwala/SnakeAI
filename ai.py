@@ -4,16 +4,17 @@ from game import Game
 import multiprocessing
 import visualize
 import pickle
-
+RUNS_PER_GAME=10
 CORE_COUNT = multiprocessing.cpu_count()-4
-
+GAME_SIZE=(200,200)
+FOOD_TIMER=(max(GAME_SIZE[0],GAME_SIZE[1])//10) * 1.414
 
 def eval_genome(genome,config):
     # for genome_id, genome in genomes:
     fitness_list=[]
-    for _ in range(10):
+    for _ in range(RUNS_PER_GAME):
         net = neat.nn.FeedForwardNetwork.create(genome,config)
-        game = Game()
+        game = Game(GAME_SIZE[0],GAME_SIZE[1])
         fitness=0
         food_timer=0
         distance_to_food=0
@@ -32,7 +33,7 @@ def eval_genome(genome,config):
             food_timer+=1
             if(game.dead):
                 break
-            if(food_timer > game.food_timer*len(game.snake_body)):
+            if(food_timer > FOOD_TIMER*len(game.snake_body)):
                 fitness-=100
                 break
             else:
