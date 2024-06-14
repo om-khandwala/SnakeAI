@@ -12,10 +12,15 @@ The inputs are then fed to the neural network. The output of the neural network 
 The fitness function is the score of the snake. It is calculated using the following rules:
 
 +1 if the snake gets closer to the food
+
 -1 if the snake gets further from the food
+
 +100 if the snake eats the food
+
 -100 if the snake dies from starving
+
 +0.1 for every frame the snake is alive
+
 stop the game if the snake dies
 
 ### Training
